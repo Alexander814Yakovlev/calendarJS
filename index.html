@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <title>Календарь</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0 20px 40px;
+            background-color: #e7e7e7;
+            font-family: 'Pacifico';
+            cursor: default;
+        }
+
+        .header {
+            margin: 0 auto;
+            max-width: 200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: transparent;
+            transform: translate(-1px, -1px);
+            filter: drop-shadow(2px 2px 3px #737373);
+        }
+
+        button:active {
+            transform: translate(1px, 1px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+
+        }
+
+        .month:hover {
+            transform: translate(-1px, -1px);
+            box-shadow: 2px 1px 3px #afadad;
+        }
+
+        table {
+            background-color: #fff;
+            border-radius: 0 0 5px 5px;
+            min-height: 254px;
+        }
+
+        caption {
+            padding: 8px;
+            background-color: #fff;
+            border-radius: 5px 5px 0 0;
+        }
+
+        th {
+            font-family: 'Pacifico';
+            font-weight: normal;
+        }
+
+        td {
+            font-family: 'Roboto';
+            padding: 8px;
+            border-radius: 3px;
+        }
+
+        .today {
+            background-color: #939cf2;
+            font-weight: 600;
+        }
+
+        .weekend {
+            color: #a40031;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container"></div>
+
+    <script>
+        let currYear = 2024;
+
+        function getDay(date) {
+            let day = date.getDay();
+            if (day === 0) {
+                day = 7;
+            }
+            return day - 1;
+        }
+
+        function createCalendar(elem, year, month) {
+            elem = document.querySelector(elem);
+            month--;
+            date = new Date(year, month);
+            monthLocale = date.toLocaleString('ru', { month: 'long' });
+            monthLocale = monthLocale[0].toUpperCase() + monthLocale.slice(1);
+
+            let table = `<table>
+        <caption>${monthLocale} ${year}</caption>
+        <tr>
+          <th>пн</th>
+          <th>вт</th>
+          <th>ср</th>
+          <th>чт</th>
+          <th>пт</th>
+          <th class="weekend">сб</th>
+          <th class="weekend">вс</th>
+        </tr>
+        <tr>`;
+
+            for (let i = 0; i < getDay(date); i++) {
+                table += '<td></td>';
+            }
+
+            while (date.getMonth() === (month)) {
+                let td = document.createElement('td');
+                td.textContent = date.getDate();
+                if (date.toDateString() == new Date(Date.now()).toDateString()) {
+                    td.classList.add("today");
+                }
+                if ([0, 6].includes(date.getDay())) {
+                    td.classList.add("weekend");
+                }
+                table += td.outerHTML;
+
+                if (date.getDay() === 0) {
+                    table += "</tr><tr>";
+                }
+                date.setDate(date.getDate() + 1);
+            }
+
+            if (getDay(date) > 0) {
+                for (let i = getDay(date); i < 7; i++) {
+                    table += '<td></td>';
+                }
+            }
+
+            table += "</tr></table>";
+            elem.innerHTML = table;
+        }
+
+        function createYearCalendar(elem, year) {
+            /** Функция создаёт календарь на год
+             * @param {string} elem елемент HTML-разметки, внутри когорого будет размещён календарь
+             * @param {number} year год, на который будет создан календарь **/
+            elem = document.querySelector(elem);
+
+            for (let i = 0; i < 12; i++) {
+                let month = document.createElement('div');
+                month.classList.add(`month__${i + 1}`);
+                elem.append(month);
+                div = `.${month.className}`;
+                createCalendar(div, year, i + 1);
+                month.classList.add('month');
+            }
+        }
+
+        function createHeader() {
+            /** Функция формирует заголовок страницы,
+             * а также создаёт кнопки для переключения года **/
+            let header = document.createElement('div');
+            header.className = 'header';
+
+            let prev = document.createElement('button');
+            prev.id = 'prev';
+            prev.textContent = '◀';
+            header.append(prev);
+
+            let yearTitle = document.createElement('h1');
+            yearTitle.style.display = 'inline';
+            yearTitle.textContent = currYear;
+            header.append(yearTitle);
+
+            let next = document.createElement('button');
+            next.id = 'next';
+            next.textContent = '▶';
+            header.append(next);
+
+            document.querySelector('body').prepend(header);
+        }
+
+
+        createHeader();
+
+        createYearCalendar('.container', currYear);
+
+        let prevButton = document.querySelector('#prev');
+        prevButton.addEventListener('click', function () {
+            currYear--;
+            document.querySelector('h1').textContent = currYear;
+            document.querySelector('.container').innerHTML = "";
+            createYearCalendar('.container', currYear);
+        });
+
+        let nextButton = document.querySelector('#next');
+        nextButton.addEventListener('click', function () {
+            currYear++;
+            document.querySelector('h1').textContent = currYear;
+            document.querySelector('.container').innerHTML = "";
+            createYearCalendar('.container', currYear);
+        });
+    </script>
+</body>
+
+</html>
