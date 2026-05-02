@@ -95,7 +95,8 @@
     <div class="container"></div>
 
     <script>
-        let currYear = new Date(Date.now()).getYear();
+        let today = new Date();
+        let currYear = today.getFullYear();
 
         function getDay(date) {
             let day = date.getDay();
